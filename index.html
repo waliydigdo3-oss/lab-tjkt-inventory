@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="LAB TJKT - Sistem Inventory Laboratorium: Stok, Pembelian & Peminjaman">
+<title>LAB TJKT — Inventory Laboratorium</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0b2b28" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.3L4.6 18a2 2 0 0 0 1.8 3h11.2a2 2 0 0 0 1.8-3L14 9.3V3"/><path d="M7.5 14h9"/></svg>
+      </div>
+      <div>
+        <h1>LAB<span>TJKT</span></h1>
+        <p>Inventory Laboratorium</p>
+      </div>
+    </div>
+
+    <div class="nav-label">Menu Utama</div>
+    <nav class="nav" id="mainNav">
+      <button class="nav-btn active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-page="stok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+        Stok Alat & Bahan
+      </button>
+      <button class="nav-btn admin-only" data-page="beli">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        Pembelian
+      </button>
+      <button class="nav-btn" data-page="pinjam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M21 3l-7 7M3 3l7 7M16 21h5v-5M8 21H3v-5M21 21l-7-7M3 21l7-7"/></svg>
+        Peminjaman <span class="badge" id="navLoanBadge" style="display:none">0</span>
+      </button>
+      <button class="nav-btn admin-only" data-page="pengguna">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Akses Akun
+      </button>
+    </nav>
+
+    <div class="nav-label">Pengguna Aktif</div>
+    <div class="device-card user-card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" id="sideAvatar" style="width:42px;height:42px;flex-shrink:0">?</div>
+        <div style="min-width:0;flex:1"><b id="sideName" style="font-size:13.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</b><span class="chip info" id="sideRole" style="margin-top:4px;display:inline-block">USER</span></div>
+      </div>
+      <button class="mini-btn red" style="width:100%;margin-top:10px" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+        Keluar</button>
+    </div>
+
+    <div class="sidebar-foot">
+      Data tersimpan otomatis di perangkat ini (offline).<br>Gunakan <b>Ekspor</b> untuk backup.
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="search" id="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="globalSearch" type="search" placeholder="Cari barang, alat, bahan praktek, dll" autocomplete="off">
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn search-toggle" id="searchToggle" aria-label="Cari">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button class="icon-btn" id="exportBtn" aria-label="Ekspor data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span class="tip">Ekspor / Backup data</span>
+        </button>
+        <button class="icon-btn admin-only" id="importBtn" aria-label="Impor data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span class="tip">Impor data (JSON)</span>
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+        <div class="profile-chip" title="Pengguna aktif">
+          <div class="avatar sm" id="profileAvatar">?</div>
+          <div class="pinfo"><b id="profileName">—</b><span id="profileRole">—</span></div>
+        </div>
+        <button class="icon-btn" id="logoutBtn" aria-label="Keluar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+          <span class="tip">Keluar</span>
+        </button>
+        <button class="btn btn-primary" id="quickAddBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span id="quickAddLabel">Tambah</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- ===== DASHBOARD ===== -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <h2>Dashboard <em>Lab</em></h2>
+            <p id="todayLine">Ringkasan stok, pembelian & peminjaman hari ini.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openExport()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              Unduh Laporan</button>
+            <button class="btn btn-primary btn-sm admin-only" onclick="openModal('item')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Barang Baru</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat" style="--glow:rgba(94,234,212,.25);--chip:rgba(94,234,212,.14)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></div>
+            <div class="num" id="stJenis">0</div>
+            <div class="lbl">Jenis Barang di Lab</div>
+            <div class="sub" id="stUnit">0 unit total</div>
+          </div>
+          <div class="stat" style="--glow:rgba(251,191,36,.25);--chip:rgba(251,191,36,.14)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+            <div class="num" id="stTipis">0</div>
+            <div class="lbl">Stok Menipis / Habis</div>
+            <div class="sub">perlu pengadaan</div>
+          </div>
+          <div class="stat" style="--glow:rgba(125,211,252,.25);--chip:rgba(125,211,252,.14)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M21 3l-7 7M3 3l7 7M16 21h5v-5M8 21H3v-5M21 21l-7-7M3 21l7-7"/></svg></div>
+            <div class="num" id="stPinjam">0</div>
+            <div class="lbl">Sedang Dipinjam</div>
+            <div class="sub" id="stTerlambat">0 terlambat</div>
+          </div>
+          <div class="stat admin-only" style="--glow:rgba(52,211,153,.25);--chip:rgba(52,211,153,.14)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="num" id="stBelanja" style="font-size:clamp(17px,2.4vw,23px)">Rp0</div>
+            <div class="lbl">Belanja Bulan Ini</div>
+            <div class="sub" id="stBelanjaTotal">total Rp0</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel admin-only">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg> Grafik Pembelian 6 Bulan Terakhir</h3>
+            <p class="desc">Total nilai pembelian per bulan (Rp).</p>
+            <div class="month-chart" id="monthChart"></div>
+          </div>
+          <div class="panel">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3"/></svg> Komposisi Kategori Barang</h3>
+            <p class="desc">Berdasarkan jumlah unit per kategori.</p>
+            <div id="catBars"></div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg> Perlu Perhatian</h3>
+            <p class="desc">Stok menipis & peminjaman lewat jatuh tempo.</p>
+            <div id="alertList"></div>
+          </div>
+          <div class="panel">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Aktivitas Terakhir</h3>
+            <p class="desc">Pembelian & peminjaman terbaru.</p>
+            <div class="activity" id="activityList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== STOK ===== -->
+      <section class="page" id="page-stok">
+        <div class="page-head">
+          <div>
+            <h2>Stok Barang <em>Lab</em></h2>
+            <p>Kelola semua barang, lokasi rak, kondisi & batas minimum stok.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV('stok')">Ekspor CSV</button>
+            <button class="btn btn-primary btn-sm admin-only" onclick="openModal('item')">+ Tambah Barang</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <select class="input" id="fKategori" style="min-width:170px"><option value="">Semua Kategori</option></select>
+          <select class="input" id="fKondisi" style="min-width:160px">
+            <option value="">Semua Kondisi</option><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option><option>Perlu Kalibrasi</option>
+          </select>
+          <select class="input" id="fStok" style="min-width:150px">
+            <option value="">Semua Stok</option><option value="habis">Habis</option><option value="tipis">Menipis</option><option value="aman">Aman</option>
+          </select>
+          <div class="seg" id="viewSeg">
+            <button class="active" data-view="grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Grid</button>
+            <button data-view="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Tabel</button>
+          </div>
+        </div>
+        <div class="cards" id="itemCards"></div>
+        <div class="table-wrap" id="itemTableWrap" style="display:none;margin-top:4px">
+          <div class="table-scroll"><table>
+            <thead><tr><th>Barang</th><th>Kategori</th><th>Lokasi</th><th>Stok</th><th>Status</th><th>Kondisi</th><th>Aksi</th></tr></thead>
+            <tbody id="itemTableBody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ===== PEMBELIAN ===== -->
+      <section class="page" id="page-beli">
+        <div class="page-head">
+          <div>
+            <h2>Pembelian & <em>Kegunaan Barang</em></h2>
+            <p>Catat setiap barang yang dibeli, harganya, dan untuk keperluan apa.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV('beli')">Ekspor CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('purchase')">+ Input Pembelian</button>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr)" id="buyStats">
+          <div class="stat"><div class="num" id="bTransaksi">0</div><div class="lbl">Transaksi Tercatat</div><div class="sub" id="bBulan">0 bulan ini</div></div>
+          <div class="stat"><div class="num" id="bTotal" style="font-size:clamp(17px,2.4vw,23px)">Rp0</div><div class="lbl">Total Nilai Pembelian</div><div class="sub">semua waktu</div></div>
+          <div class="stat"><div class="num" id="bTopCat" style="font-size:clamp(15px,2.2vw,20px)">—</div><div class="lbl">Kategori Belanja Terbesar</div><div class="sub" id="bTopVal">Rp0</div></div>
+        </div>
+        <div class="toolbar">
+          <div class="grow"><select class="input" id="fBelanja" style="max-width:260px"><option value="">Semua Kategori Belanja</option><option>Operasional</option><option>Praktikum</option><option>Penelitian</option><option>Perawatan</option><option>Pengadaan Baru</option></select></div>
+          <input type="month" class="input" id="fBulan" style="max-width:200px">
+        </div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>Tanggal</th><th>Barang & Kegunaan</th><th>Supplier</th><th>Qty × Harga</th><th>Total</th><th>Aksi</th></tr></thead>
+          <tbody id="buyBody"></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== PEMINJAMAN ===== -->
+      <section class="page" id="page-pinjam">
+        <div class="page-head">
+          <div>
+            <h2>Peminjaman <em>Barang</em></h2>
+            <p>Siapa meminjam apa & kapan kembali. Ajuan kembali dari user wajib dikonfirmasi admin.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV('pinjam')">Ekspor CSV</button>
+            <button class="btn btn-amber btn-sm" onclick="openModal('loan')">+ Pinjam Barang</button>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat"><div class="num" id="lAktif">0</div><div class="lbl">Sedang Dipinjam</div><div class="sub" id="lAktifSub">0 menunggu konfirmasi</div></div>
+          <div class="stat"><div class="num" id="lTelat" style="color:var(--red)">0</div><div class="lbl">Terlambat</div><div class="sub">lewat jatuh tempo</div></div>
+          <div class="stat"><div class="num" id="lKembali">0</div><div class="lbl">Dikembalikan</div><div class="sub">total selesai</div></div>
+        </div>
+        <div class="toolbar">
+          <div class="seg" id="loanSeg">
+            <button class="active" data-loan="semua">Semua</button>
+            <button data-loan="aktif">Dipinjam</button>
+            <button data-loan="terlambat">Terlambat</button>
+            <button data-loan="menunggu">Menunggu</button>
+            <button data-loan="kembali">Dikembalikan</button>
+          </div>
+        </div>
+        <div class="cards" id="loanCards" style="grid-template-columns:repeat(2,1fr)"></div>
+      </section>
+
+      <!-- ===== PENGGUNA (ADMIN) ===== -->
+      <section class="page" id="page-pengguna">
+        <div class="page-head">
+          <div>
+            <h2>Kelola <em>Akun</em></h2>
+            <p>Khusus admin — buat akun user, atur peran & password.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-primary btn-sm" onclick="formUser()">+ Tambah Pengguna</button>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:14px">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Hak Akses</h3>
+          <p class="desc" style="margin-bottom:0"><b style="color:var(--amber)">Admin:</b> semua menu (stok, pembelian, peminjaman, pengguna). &nbsp;•&nbsp; <b style="color:var(--blue)">User:</b> hanya melihat stok + meminjam & mengembalikan barang.</p>
+        </div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Dibuat</th><th>Aksi</th></tr></thead>
+          <tbody id="userBody"></tbody>
+        </table></div></div>
+      </section>
+
+      <footer class="app-foot">
+        <b>Lab TJKT</b> v1.1 — berjalan 100% offline di perangkat Anda &nbsp;•&nbsp; Data tersimpan di browser (LocalStorage) &nbsp;•&nbsp; Dibuat untuk Lab
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- Bottom nav mobile -->
+<nav class="bottomnav" id="bottomNav">
+  <button class="active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</button>
+  <button data-page="stok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>Stok</button>
+  <button data-page="beli" class="admin-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Beli</button>
+  <button data-page="pinjam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M21 3l-7 7M3 3l7 7M16 21h5v-5M8 21H3v-5M21 21l-7-7M3 21l7-7"/></svg>Pinjam</button>
+  <button data-page="pengguna" class="admin-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>User</button>
+</nav>
+
+<!-- Login -->
+<div class="login-bg" id="loginBg">
+  <div class="login-card">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0b2b28" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.3L4.6 18a2 2 0 0 0 1.8 3h11.2a2 2 0 0 0 1.8-3L14 9.3V3"/><path d="M7.5 14h9"/></svg>
+    </div>
+    <h2>Lab <span>TJKT</span></h2>
+    <p>Inventory Laboratorium — Silahkan masuk untuk melanjutkan</p>
+    <div class="login-field"><label class="lbl">Username</label><input class="input" id="loginUser" placeholder="username" autocomplete="username"></div>
+    <div class="login-field"><label class="lbl">Password</label><input class="input" id="loginPass" type="password" placeholder="password" autocomplete="current-password"></div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()">Login</button>
+    <div class="demo-box">
+      Belum punya akun? Hubungi <b>admin lab</b> untuk dibuatkan akun.
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <div class="m-ico" id="modalIco"></div>
+      <div><h3 id="modalTitle">Judul</h3><p id="modalSub">Sub</p></div>
+      <button class="modal-x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+  <script src="js/core.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/purchases.js"></script>
+  <script src="js/loans.js"></script>
+  <script src="js/io.js"></script>
+  <script src="js/device.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
