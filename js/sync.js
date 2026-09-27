@@ -1,3 +1,4 @@
+// ===== SALIN DARI SINI =====
 /* =====================================================
  * LAB TJKT — js/sync.js
  * Sinkronisasi Google Sheets via Apps Script Web App.
@@ -7,10 +8,13 @@
 "use strict";
 /* ================= SINKRONISASI GOOGLE SHEETS ================= */
 const LS_API="labtjkt_api_url", LS_LASTSYNC="labtjkt_last_sync";
+// URL Web App bawaan (diisi sekali di kode agar SEMUA perangkat otomatis sinkron).
+// Admin tetap bisa menimpa lewat menu Ekspor → Sinkronisasi.
+const DEFAULT_API_URL="https://script.google.com/macros/s/AKfycbxzbSgGnO5lbildoIJjZuOriXxmYTx9q945tJYTHmM-WEhkE1pAezpAxUFD89C6-HSc/exec";
 const SYNC_COLS=["items","purchases","loans","users"];
 let _pushTimer=null, _syncing=false;
 
-function getApiUrl(){try{return (localStorage.getItem(LS_API)||"").trim()}catch(e){return""}}
+function getApiUrl(){try{const u=(localStorage.getItem(LS_API)||"").trim();return u||DEFAULT_API_URL}catch(e){return DEFAULT_API_URL}}
 function isSyncOn(){return getApiUrl().indexOf("https://script.google.com/")==0}
 function lastSyncText(){try{return localStorage.getItem(LS_LASTSYNC)||""}catch(e){return""}}
 function markSynced(){try{localStorage.setItem(LS_LASTSYNC,new Date().toLocaleString("id-ID"))}catch(e){}}
@@ -106,3 +110,4 @@ function manualSync(){
   toast("Menyinkronkan dengan <b>Google Sheets</b>...");
   pullFromSheets(false);
 }
+// ===== SAMPAI SINI =====
